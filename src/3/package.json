@@ -1,0 +1,16 @@
+{
+    "name": "employee-scheduling-gui",
+    "version": "1.0.0",
+    "description": "A web-based GUI for employee scheduling with ranked shift preferences",
+    "main": "schedule.js",
+    "scripts": {
+        "start": "node schedule.js"
+    },
+    "dependencies": {
+        "csv-parser": "^3.2.0",
+        "express": "^4.21.2",
+        "multer": "^1.4.5-lts.1"
+    },
+    "author": "Samrat Baral",
+    "license": "MIT"
+}

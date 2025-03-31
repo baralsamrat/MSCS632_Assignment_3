@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Employee Scheduling - Upload CSV</title>
+</head>
+<body>
+  <h1>Employee Scheduling App</h1>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <label for="csvfile">Select CSV file with ranked preferences:</label>
+    <input type="file" id="csvfile" name="csvfile" accept=".csv" required>
+    <br><br>
+    <button type="submit">Upload and Generate Schedule</button>
+  </form>
+</body>
+</html>
