@@ -37,6 +37,7 @@ echo "Node Checking"
 npm cache clean --force
 npm config set registry https://registry.npmjs.org/
 rm -rf node_modules
+# rm -rf packages.json
 
 # --- Node.js Part ---
 if [ ! -d "node_modules" ]; then

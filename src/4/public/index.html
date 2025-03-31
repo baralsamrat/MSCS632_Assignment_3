@@ -1,15 +1,108 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Employee Scheduling - Upload CSV</title>
+  <title>Employee Scheduling CSV Editor</title>
+  <style>
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #aaa; padding: 5px; text-align: left; }
+    td[contenteditable="true"] { background-color: #eef; }
+  </style>
 </head>
 <body>
-  <h1>Employee Scheduling App</h1>
-  <form action="/upload" method="post" enctype="multipart/form-data">
-    <label for="csvfile">Select CSV file with ranked preferences:</label>
-    <input type="file" id="csvfile" name="csvfile" accept=".csv" required>
-    <br><br>
-    <button type="submit">Upload and Generate Schedule</button>
-  </form>
+  <h1>Employee Scheduling CSV Editor</h1>
+  <input type="file" id="csvFileInput" accept=".csv">
+  <button id="loadBtn">Load CSV</button>
+  <button id="downloadBtn" disabled>Download CSV</button>
+  <button id="generateBtn" disabled>Generate Schedule</button>
+  <hr>
+  <div id="csvContainer"></div>
+  <hr>
+  <div id="scheduleContainer"></div>
+
+  <script>
+    let csvData = "";
+
+    document.getElementById("loadBtn").addEventListener("click", () => {
+      const fileInput = document.getElementById("csvFileInput");
+      if (fileInput.files.length === 0) {
+        alert("Please select a CSV file.");
+        return;
+      }
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        csvData = e.target.result;
+        displayCSV(csvData);
+        document.getElementById("downloadBtn").disabled = false;
+        document.getElementById("generateBtn").disabled = false;
+      }
+      reader.readAsText(file);
+    });
+
+    function displayCSV(data) {
+      const lines = data.split(/\r?\n/).filter(line => line.trim() !== "");
+      let html = "<table id='csvTable'><thead><tr>";
+      const headers = lines[0].split(",");
+      headers.forEach(header => {
+        html += `<th>${header}</th>`;
+      });
+      html += "</tr></thead><tbody>";
+      for (let i = 1; i < lines.length; i++) {
+        const cells = lines[i].split(",");
+        html += "<tr>";
+        cells.forEach(cell => {
+          // Make each cell editable
+          html += `<td contenteditable="true">${cell}</td>`;
+        });
+        html += "</tr>";
+      }
+      html += "</tbody></table>";
+      document.getElementById("csvContainer").innerHTML = html;
+    }
+
+    function tableToCSV() {
+      const table = document.getElementById("csvTable");
+      let csv = "";
+      const rows = table.querySelectorAll("tr");
+      rows.forEach(row => {
+        const cols = row.querySelectorAll("th, td");
+        const rowData = [];
+        cols.forEach(col => {
+          rowData.push(col.innerText.trim());
+        });
+        csv += rowData.join(",") + "\n";
+      });
+      return csv;
+    }
+
+    document.getElementById("downloadBtn").addEventListener("click", () => {
+      const updatedCSV = tableToCSV();
+      const blob = new Blob([updatedCSV], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "updated_schedule.csv";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    document.getElementById("generateBtn").addEventListener("click", () => {
+      const updatedCSV = tableToCSV();
+      // Send updated CSV data to the server via AJAX
+      fetch("/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ csvData: updatedCSV })
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById("scheduleContainer").innerHTML = data.html;
+      })
+      .catch(error => {
+        console.error("Error generating schedule:", error);
+      });
+    });
+  </script>
 </body>
 </html>
